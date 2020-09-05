@@ -1,6 +1,10 @@
 package models
 
-import "fmt"
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
 
 func Something() {
 	fmt.Println("Printing")
@@ -28,6 +32,12 @@ func GetCardPack() []Card {
 		}
 	}
 	return cards
+}
+
+func Shuffle(vals []Card) []Card {
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(vals), func(i, j int) { vals[i], vals[j] = vals[j], vals[i] })
+	return vals
 }
 func getAllCardSuits() []string {
 	return []string{"Spades", "Hearts", "Diamonds", "Clubs"}

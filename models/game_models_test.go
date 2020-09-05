@@ -1,6 +1,9 @@
 package models
 
 import (
+	"io"
+	"io/ioutil"
+	"os"
 	"testing"
 )
 
@@ -73,5 +76,47 @@ func TestCardDistributeInsufficientCards(t *testing.T) {
 	result := g.DistributeCardsToPlayersInit(20)
 	if result {
 		t.Errorf("Expected false since 80 cards will be required")
+	}
+}
+
+func TestInitGame(t *testing.T) {
+	var g Game
+	in, err := ioutil.TempFile("", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer in.Close()
+	_, err = io.WriteString(in, "4\n"+"a\nb\nc\nd")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = in.Seek(0, os.SEEK_SET)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result := g.InitGame(in)
+	if !result {
+		t.Errorf("Expected true, got %v", result)
+	}
+}
+
+func TestInitGameNegativeMorePlayers(t *testing.T) {
+	var g Game
+	in, err := ioutil.TempFile("", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer in.Close()
+	_, err = io.WriteString(in, "53\n"+"Prasang Misra\nb\nc\nd")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = in.Seek(0, os.SEEK_SET)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result := g.InitGame(in)
+	if result {
+		t.Errorf("Expected false, got %v", result)
 	}
 }

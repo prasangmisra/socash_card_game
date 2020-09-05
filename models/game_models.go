@@ -1,5 +1,12 @@
 package models
 
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strconv"
+)
+
 type Game struct {
 	NoOfPlayers      int
 	Players          []Player
@@ -40,5 +47,37 @@ func (g *Game) DistributeCardsToPlayersInit(number int) bool {
 	//Removing the distributed cards from cards left
 	g.CardsLeft = g.CardsLeft[count:]
 	g.CardsDistributed = true
+	return true
+}
+
+//InitGame takes number of players and player details
+func (g *Game) InitGame(in *os.File) bool {
+	inReader := bufio.NewReader(in)
+	if in == nil {
+		in = os.Stdin
+		inReader = bufio.NewReader(os.Stdin)
+	}
+	var numberOfPlayers int
+	fmt.Println("Enter the number of players")
+	_, err := fmt.Fscanf(in, "%d", &numberOfPlayers)
+	if err != nil {
+		panic(err)
+	}
+	//52 is the number of cards available
+	if numberOfPlayers > 52 {
+		fmt.Println("Cannot play with so many members")
+		return false
+	}
+	var players []Player
+	for key := 0; key < numberOfPlayers; key++ {
+		var player Player
+		fmt.Println("Please enter the name of player ", key+1)
+		player.Name, _ = inReader.ReadString('\n')
+		if player.Name == "" {
+			player.Name = "Player" + strconv.Itoa(key+1)
+		}
+		fmt.Println(player.Name)
+		players = append(players, player)
+	}
 	return true
 }

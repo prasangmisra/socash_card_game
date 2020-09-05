@@ -7,16 +7,13 @@ import (
 	"strconv"
 )
 
+const GAME_PER_PLAYER_INIT = 3
+
 type Game struct {
-	NoOfPlayers      int
 	Players          []Player
 	Winner           Player
 	CardsDistributed bool
 	CardsLeft        []Card
-}
-
-func (g Game) GetWinner() Player {
-	return g.Winner
 }
 
 //DistributeCardsToPlayers method will shuffle the pack of cards and distribute
@@ -51,7 +48,7 @@ func (g *Game) DistributeCardsToPlayersInit(number int) bool {
 }
 
 //InitGame takes number of players and player details
-func (g *Game) InitGame(in *os.File) bool {
+func (g *Game) InitGamePlayers(in *os.File) bool {
 	inReader := bufio.NewReader(in)
 	if in == nil {
 		in = os.Stdin
@@ -77,7 +74,118 @@ func (g *Game) InitGame(in *os.File) bool {
 			player.Name = "Player" + strconv.Itoa(key+1)
 		}
 		fmt.Println(player.Name)
+		player.Status = PLAYER_STATUS_PLAYING
 		players = append(players, player)
 	}
+	return true
+}
+
+//FindWinnerFromTie gets the single player that has a tie status which is the winner
+//If there are more than 1 winner, it will send the first winner
+func (g *Game) FindWinnerFromTie() (bool, Player) {
+	for key, value := range g.Players {
+		if value.Status == PLAYER_STATUS_TIE {
+			g.Players[key].Status = PLAYER_STATUS_WIN
+			g.Winner = g.Players[key]
+			return true, g.Winner
+		}
+	}
+	return false, g.Winner
+}
+
+//FindTrailWinner figures if there is any winner from trail
+func (g *Game) FindTrailWinner() (bool, Player) {
+	trailCount := 0
+	for key, value := range g.Players {
+		if value.IsTrail() && value.Status == PLAYER_STATUS_PLAYING {
+			trailCount++
+			g.Players[key].Status = PLAYER_STATUS_TIE
+		}
+	}
+	if trailCount == 1 {
+		return g.FindWinnerFromTie()
+	}
+	return false, g.Winner
+}
+
+//FindSequenceWinner figures if there is any winner from sequence
+func (g *Game) FindSequenceWinner() (bool, Player) {
+	sequenceCount := 0
+	for key, value := range g.Players {
+		if value.IsSequence() && value.Status == PLAYER_STATUS_PLAYING {
+			sequenceCount++
+			g.Players[key].Status = PLAYER_STATUS_TIE
+		}
+	}
+	if sequenceCount == 1 {
+		return g.FindWinnerFromTie()
+	}
+	return false, g.Winner
+}
+
+//FindPairWinner figures if there is any winner from pair
+func (g *Game) FindPairWinner() (bool, Player) {
+	pairCount := 0
+	for key, value := range g.Players {
+		if value.IsPair() && value.Status == PLAYER_STATUS_PLAYING {
+			pairCount++
+			g.Players[key].Status = PLAYER_STATUS_TIE
+		}
+	}
+	if pairCount == 1 {
+		return g.FindWinnerFromTie()
+	}
+	return false, g.Winner
+}
+
+//FindPairWinner figures if there is any winner from pair
+func (g *Game) FindTopWinner() (bool, Player) {
+	//Get top cards from all players
+	var cards []Card
+	highestWeight := -1
+	topCount := 0
+	for _, value := range g.Players {
+		cards = append(cards, value.GetTopCard())
+		if value.GetTopCard().Weight >= highestWeight {
+			highestWeight = value.GetTopCard().Weight
+		}
+	}
+	//Compare the highestWeight of all top cards
+	for key, value := range g.Players {
+		if value.GetTopCard().Weight == highestWeight {
+			g.Players[key].Status = PLAYER_STATUS_TIE
+			topCount++
+		}
+	}
+	if topCount == 1 {
+		return g.FindWinnerFromTie()
+	}
+	return false, g.Winner
+}
+
+//GetWinner tries to find out if there is any winner after distributing the first set of cards
+func (g *Game) GetWinner() (bool, Player) {
+
+	result, winner := g.FindTrailWinner()
+	if result {
+		return result, winner
+	}
+	result, winner = g.FindSequenceWinner()
+	if result {
+		return result, winner
+	}
+	result, winner = g.FindPairWinner()
+	if result {
+		return result, winner
+	}
+	result, winner = g.FindTopWinner()
+	if result {
+		return result, winner
+	}
+	return false, g.Winner
+}
+
+func (g *Game) StartGame() bool {
+
 	return true
 }

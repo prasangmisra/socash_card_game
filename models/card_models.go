@@ -1,14 +1,9 @@
 package models
 
 import (
-	"fmt"
 	"math/rand"
 	"time"
 )
-
-func Something() {
-	fmt.Println("Printing")
-}
 
 //Card struct, defining card properties
 type Card struct {

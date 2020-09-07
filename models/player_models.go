@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"sort"
 )
 
@@ -22,10 +21,7 @@ func (p *Player) IsTrail() bool {
 		return false
 	}
 	number := p.Cards[0].Number
-	fmt.Println(number)
-	fmt.Println(len(p.Cards))
 	for key := 1; key < len(p.Cards); key++ {
-		fmt.Println("Key:", p.Cards[key].Number, ".Number:", number)
 		if p.Cards[key].Number != number {
 			return false
 		}
@@ -57,12 +53,10 @@ func (p *Player) IsPair() bool {
 	for outerKey := range p.Cards {
 		for innerKey := range p.Cards {
 			if outerKey != innerKey && p.Cards[outerKey].Weight == p.Cards[innerKey].Weight {
-				fmt.Println("It has a pair")
-				return true
+				return true //It has a pair
 			}
 		}
 	}
-	fmt.Println("No Pair found")
 	return false
 }
 
@@ -80,4 +74,10 @@ func (p *Player) GetTopCard() Card {
 		}
 	}
 	return card
+}
+
+func (p *Player) UpdateStatus(status string) bool {
+	p.Status = status
+
+	return true
 }

@@ -8,30 +8,13 @@ import (
 	"testing"
 )
 
-func TestCardDistribute(t *testing.T) {
-	var g Game
-	var players []Player
-
-	var player Player
-	players = append(players, player)
-	players = append(players, player)
-	players = append(players, player)
-	players = append(players, player)
-	g.Players = players
-	result := g.DistributeCardsToPlayersInit(4)
-	if !result {
-		t.Errorf("Expected something else")
-	}
-}
-
 func TestCardDistributeNoPlayers(t *testing.T) {
 	var g Game
 	result := g.DistributeCardsToPlayersInit(4)
 	if result {
-		t.Errorf("Expected something else")
+		t.Errorf("Expected false since there are 0 players, received %v", result)
 	}
 }
-
 func TestCardDistributeZeroCards(t *testing.T) {
 	var g Game
 	var players []Player
@@ -47,7 +30,6 @@ func TestCardDistributeZeroCards(t *testing.T) {
 		t.Errorf("Expected something else")
 	}
 }
-
 func TestCardDistributeNegativeCards(t *testing.T) {
 	var g Game
 	var players []Player
@@ -62,7 +44,6 @@ func TestCardDistributeNegativeCards(t *testing.T) {
 		t.Errorf("Expected false since -3 cards cannot be distributed")
 	}
 }
-
 func TestCardDistributeInsufficientCards(t *testing.T) {
 	var g Game
 	var players []Player
@@ -75,6 +56,21 @@ func TestCardDistributeInsufficientCards(t *testing.T) {
 	result := g.DistributeCardsToPlayersInit(20)
 	if result {
 		t.Errorf("Expected false since 80 cards will be required")
+	}
+}
+func TestCardDistribute(t *testing.T) {
+	var g Game
+	var players []Player
+
+	var player Player
+	players = append(players, player)
+	players = append(players, player)
+	players = append(players, player)
+	players = append(players, player)
+	g.Players = players
+	result := g.DistributeCardsToPlayersInit(4)
+	if !result {
+		t.Errorf("Expected something else")
 	}
 }
 
@@ -133,9 +129,9 @@ func TestFindWinnerFromTiePositive(t *testing.T) {
 	player.Name = "C"
 	g.Players = append(g.Players, player)
 
-	resultFlag, result := g.FindWinnerFromTie()
-	if !resultFlag || result.Name != "A" {
-		t.Errorf("Expected A as the winner, got %v", result.Name)
+	resultFlag, result := g.FindAllWinnerFromTie()
+	if !resultFlag || result[0].Name != "A" {
+		t.Errorf("Expected A as the winner, got %v", result[0].Name)
 	}
 }
 
@@ -152,10 +148,10 @@ func TestFindWinnerFromTiePositiveMultiple(t *testing.T) {
 	player.Name = "C"
 	g.Players = append(g.Players, player)
 
-	resultFlag, result := g.FindWinnerFromTie()
+	resultFlag, result := g.FindAllWinnerFromTie()
 	fmt.Println(resultFlag)
-	if !resultFlag || result.Name != "A" {
-		t.Errorf("Expected A as the winner, got %v", result.Name)
+	if !resultFlag || result[0].Name != "A" {
+		t.Errorf("Expected A as the winner, got %v", result[0].Name)
 	}
 }
 
@@ -172,18 +168,18 @@ func TestFindWinnerFromTieNegativeNoWinner(t *testing.T) {
 	player.Name = "C"
 	g.Players = append(g.Players, player)
 
-	resultFlag, result := g.FindWinnerFromTie()
-	if resultFlag || result.Name != "" {
-		t.Errorf("Expected Blank as the winner, got %v", result.Name)
+	resultFlag, result := g.FindAllWinnerFromTie()
+	if resultFlag || len(result) != 0 {
+		t.Errorf("Expected Blank as the winner, got %v results", len(result))
 	}
 }
 
 func TestFindWinnerFromTieNegativeEmpty(t *testing.T) {
 	var g Game
 
-	resultFlag, result := g.FindWinnerFromTie()
-	if resultFlag || result.Name != "" {
-		t.Errorf("Expected Blank as the winner, got %v %v", result.Name, resultFlag)
+	resultFlag, result := g.FindAllWinnerFromTie()
+	if resultFlag || len(result) > 0 {
+		t.Errorf("Expected Blank as the winner, got %v %v", len(result), resultFlag)
 	}
 }
 
@@ -215,8 +211,8 @@ func TestFindTrailWinnerPositive(t *testing.T) {
 	g.Players = append(g.Players, player)
 
 	resultFlag, result := g.FindTrailWinner()
-	if !resultFlag || result.Name != "A" {
-		t.Errorf("Expected none, got %v and flag %v", result.Name, resultFlag)
+	if !resultFlag || result[0].Name != "A" {
+		t.Errorf("Expected none, got %v and flag %v", result[0].Name, resultFlag)
 	}
 }
 
@@ -248,8 +244,8 @@ func TestFindTrailWinnerNegative(t *testing.T) {
 	g.Players = append(g.Players, player)
 
 	resultFlag, result := g.FindTrailWinner()
-	if resultFlag || result.Name != "" {
-		t.Errorf("Expected none, got %v and flag %v", result.Name, resultFlag)
+	if resultFlag || len(result) != 3 {
+		t.Errorf("Expected 3 and false, got %v and flag %v", len(result), resultFlag)
 	}
 }
 
@@ -281,16 +277,16 @@ func TestFindTrailWinnerNegativeMultipleTrail(t *testing.T) {
 	g.Players = append(g.Players, player)
 
 	resultFlag, result := g.FindTrailWinner()
-	if resultFlag || result.Name != "" {
-		t.Errorf("Expected none, got %v and flag %v", result.Name, resultFlag)
+	if !resultFlag || len(result) != 2 {
+		t.Errorf("Expected none, got %v and flag %v", len(result), resultFlag)
 	}
 }
 
 func TestFindTrailWinnerNegativeNoPlayers(t *testing.T) {
 	var g Game
 	resultFlag, result := g.FindTrailWinner()
-	if resultFlag || result.Name != "" {
-		t.Errorf("Expected none, got %v and flag %v", result.Name, resultFlag)
+	if resultFlag || len(result) != 0 {
+		t.Errorf("Expected none, got %v and flag %v", result[0].Name, resultFlag)
 	}
 }
 
@@ -322,8 +318,8 @@ func TestFindSequenceWinnerPositive(t *testing.T) {
 	g.Players = append(g.Players, player)
 
 	resultFlag, result := g.FindSequenceWinner()
-	if !resultFlag || result.Name != "B" {
-		t.Errorf("Expected none, got %v and flag %v", result.Name, resultFlag)
+	if !resultFlag || result[0].Name != "B" {
+		t.Errorf("Expected none, got %v and flag %v", result[0].Name, resultFlag)
 	}
 }
 
@@ -355,12 +351,12 @@ func TestFindSequenceWinnerNegative(t *testing.T) {
 	g.Players = append(g.Players, player)
 
 	resultFlag, result := g.FindSequenceWinner()
-	if resultFlag || result.Name != "" {
-		t.Errorf("Expected none, got %v and flag %v", result.Name, resultFlag)
+	if resultFlag || len(result) != 3 {
+		t.Errorf("Expected 3 and false, got %v and flag %v", len(result), resultFlag)
 	}
 }
 
-func TestFindSequenceWinnerNegativeMultipleSequence(t *testing.T) {
+func TestFindSequenceWinnerMultipleSequence(t *testing.T) {
 	var g Game
 	var player Player
 
@@ -388,16 +384,16 @@ func TestFindSequenceWinnerNegativeMultipleSequence(t *testing.T) {
 	g.Players = append(g.Players, player)
 
 	resultFlag, result := g.FindSequenceWinner()
-	if resultFlag || result.Name != "" {
-		t.Errorf("Expected none, got %v and flag %v", result.Name, resultFlag)
+	if !resultFlag || len(result) != 3 {
+		t.Errorf("Expected 3 and true, got %v and flag %v", len(result), resultFlag)
 	}
 }
 
 func TestFindSequenceWinnerNegativeNoPlayers(t *testing.T) {
 	var g Game
 	resultFlag, result := g.FindSequenceWinner()
-	if resultFlag || result.Name != "" {
-		t.Errorf("Expected none, got %v and flag %v", result.Name, resultFlag)
+	if resultFlag || len(result) != 0 {
+		t.Errorf("Expected none, got %v and flag %v", result[0].Name, resultFlag)
 	}
 }
 
@@ -429,8 +425,8 @@ func TestFindPairWinnerPositive(t *testing.T) {
 	g.Players = append(g.Players, player)
 
 	resultFlag, result := g.FindPairWinner()
-	if !resultFlag || result.Name != "A" {
-		t.Errorf("Expected none, got %v and flag %v", result.Name, resultFlag)
+	if !resultFlag || result[0].Name != "A" {
+		t.Errorf("Expected none, got %v and flag %v", result[0].Name, resultFlag)
 	}
 }
 
@@ -462,12 +458,12 @@ func TestFindPairWinnerNegative(t *testing.T) {
 	g.Players = append(g.Players, player)
 
 	resultFlag, result := g.FindPairWinner()
-	if resultFlag || result.Name != "" {
-		t.Errorf("Expected none, got %v and flag %v", result.Name, resultFlag)
+	if resultFlag || len(result) != 3 {
+		t.Errorf("Expected none, got %v and flag %v", len(result), resultFlag)
 	}
 }
 
-func TestFindPairWinnerNegativeMultiplePairs(t *testing.T) {
+func TestFindPairWinnerMultiplePairs(t *testing.T) {
 	var g Game
 	var player Player
 
@@ -495,16 +491,16 @@ func TestFindPairWinnerNegativeMultiplePairs(t *testing.T) {
 	g.Players = append(g.Players, player)
 
 	resultFlag, result := g.FindPairWinner()
-	if resultFlag || result.Name != "" {
-		t.Errorf("Expected none, got %v and flag %v", result.Name, resultFlag)
+	if !resultFlag || len(result) != 2 {
+		t.Errorf("Expected none, got %v and flag %v", result[0].Name, resultFlag)
 	}
 }
 
 func TestFindPairWinnerNegativeNoPlayers(t *testing.T) {
 	var g Game
 	resultFlag, result := g.FindPairWinner()
-	if resultFlag || result.Name != "" {
-		t.Errorf("Expected none, got %v and flag %v", result.Name, resultFlag)
+	if resultFlag || len(result) != 0 {
+		t.Errorf("Expected none, got %v and flag %v", len(result), resultFlag)
 	}
 }
 
@@ -536,12 +532,12 @@ func TestFindTopWinnerPositive(t *testing.T) {
 	g.Players = append(g.Players, player)
 
 	resultFlag, result := g.FindTopWinner()
-	if !resultFlag || result.Name != "B" {
-		t.Errorf("Expected B, got %v and flag %v", result.Name, resultFlag)
+	if !resultFlag || result[0].Name != "B" {
+		t.Errorf("Expected B, got %v and flag %v", result[0].Name, resultFlag)
 	}
 }
 
-func TestFindTopWinnerNegative(t *testing.T) {
+func TestFindTopWinnerMultiple(t *testing.T) {
 	var g Game
 	var player Player
 
@@ -569,12 +565,20 @@ func TestFindTopWinnerNegative(t *testing.T) {
 	g.Players = append(g.Players, player)
 
 	resultFlag, result := g.FindTopWinner()
-	if resultFlag || result.Name != "" {
-		t.Errorf("Expected none, got %v and flag %v", result.Name, resultFlag)
+	if !resultFlag || len(result) != 2 {
+		t.Errorf("Expected 2, got %v and flag %v", len(result), resultFlag)
 	}
 }
 
-func TestFindTopWinnerNegativeMultipleTop(t *testing.T) {
+func TestFindTopWinnerNegativeNoPlayers(t *testing.T) {
+	var g Game
+	resultFlag, result := g.FindTopWinner()
+	if resultFlag || len(result) != 0 {
+		t.Errorf("Expected none, got %v and flag %v", len(result), resultFlag)
+	}
+}
+
+func TestDistributeFaceOffCardsPositive(t *testing.T) {
 	var g Game
 	var player Player
 
@@ -588,29 +592,133 @@ func TestFindTopWinnerNegativeMultipleTop(t *testing.T) {
 	player.Status = PLAYER_STATUS_PLAYING
 	player.Name = "B"
 	player.Cards = nil
-	player.Cards = append(player.Cards, Card{Suit: "Spades", Name: "7", Weight: 7, Number: 7})
-	player.Cards = append(player.Cards, Card{Suit: "Hearts", Name: "8", Weight: 8, Number: 8})
+	player.Cards = append(player.Cards, Card{Suit: "Spades", Name: "8", Weight: 8, Number: 8})
+	player.Cards = append(player.Cards, Card{Suit: "Hearts", Name: "9", Weight: 9, Number: 9})
 	player.Cards = append(player.Cards, Card{Suit: "Clubs", Name: "8", Weight: 8, Number: 8})
 	g.Players = append(g.Players, player)
 
 	player.Status = PLAYER_STATUS_PLAYING
 	player.Name = "C"
 	player.Cards = nil
+	player.Cards = append(player.Cards, Card{Suit: "Spades", Name: "4", Weight: 4, Number: 4})
+	player.Cards = append(player.Cards, Card{Suit: "Hearts", Name: "8", Weight: 8, Number: 8})
+	player.Cards = append(player.Cards, Card{Suit: "Clubs", Name: "7", Weight: 7, Number: 7})
+	g.Players = append(g.Players, player)
+	g.CardsLeft = GetCardPack()
+	for key := 0; key < len(g.CardsLeft); key++ {
+		value := g.CardsLeft[key]
+		if (value.Suit == "Spades" && (value.Name == "7" || value.Name == "8" || value.Name == "4")) ||
+			(value.Suit == "Hearts" && (value.Name == "7" || value.Name == "9" || value.Name == "8")) ||
+			(value.Suit == "Clubs" && (value.Name == "9" || value.Name == "8" || value.Name == "7")) {
+			g.CardsLeft = append(g.CardsLeft[:key-1], g.CardsLeft[key:]...)
+			key--
+		}
+	}
+	result, _ := g.GetFirstWinner()
+	if !result {
+		finalResult := g.DistributeFaceOffCard()
+		if finalResult {
+			if len(g.Players[0].Cards) != 4 {
+				t.Errorf("Expected 5 cards, received %v for %v", len(g.Players[0].Cards), g.Players[0].Name)
+			}
+		}
+	}
+}
+
+func TestDistributeFaceOffCardsNegativeNoCardsLeft(t *testing.T) {
+	var g Game
+	var player Player
+
+	player.Status = PLAYER_STATUS_PLAYING
+	player.Name = "A"
 	player.Cards = append(player.Cards, Card{Suit: "Spades", Name: "7", Weight: 7, Number: 7})
+	player.Cards = append(player.Cards, Card{Suit: "Hearts", Name: "7", Weight: 7, Number: 7})
+	player.Cards = append(player.Cards, Card{Suit: "Clubs", Name: "9", Weight: 9, Number: 9})
+	g.Players = append(g.Players, player)
+
+	player.Status = PLAYER_STATUS_PLAYING
+	player.Name = "B"
+	player.Cards = nil
+	player.Cards = append(player.Cards, Card{Suit: "Spades", Name: "8", Weight: 8, Number: 8})
 	player.Cards = append(player.Cards, Card{Suit: "Hearts", Name: "9", Weight: 9, Number: 9})
 	player.Cards = append(player.Cards, Card{Suit: "Clubs", Name: "8", Weight: 8, Number: 8})
 	g.Players = append(g.Players, player)
 
-	resultFlag, result := g.FindTopWinner()
-	if resultFlag || result.Name != "" {
-		t.Errorf("Expected none, got %v and flag %v", result.Name, resultFlag)
+	player.Status = PLAYER_STATUS_PLAYING
+	player.Name = "C"
+	player.Cards = nil
+	player.Cards = append(player.Cards, Card{Suit: "Spades", Name: "4", Weight: 4, Number: 4})
+	player.Cards = append(player.Cards, Card{Suit: "Hearts", Name: "8", Weight: 8, Number: 8})
+	player.Cards = append(player.Cards, Card{Suit: "Clubs", Name: "7", Weight: 7, Number: 7})
+	g.Players = append(g.Players, player)
+	result, _ := g.GetFirstWinner()
+	if !result {
+		finalResult := g.DistributeFaceOffCard()
+		if finalResult {
+			t.Errorf("0 Cards left, still giving true")
+		}
 	}
 }
 
-func TestFindTopWinnerNegativeNoPlayers(t *testing.T) {
+func TestShowPlayerCards(t *testing.T) {
 	var g Game
-	resultFlag, result := g.FindTopWinner()
-	if resultFlag || result.Name != "" {
-		t.Errorf("Expected none, got %v and flag %v", result.Name, resultFlag)
+	var player Player
+
+	player.Status = PLAYER_STATUS_PLAYING
+	player.Name = "A"
+	player.Cards = append(player.Cards, Card{Suit: "Spades", Name: "7", Weight: 7, Number: 7})
+	player.Cards = append(player.Cards, Card{Suit: "Hearts", Name: "7", Weight: 7, Number: 7})
+	player.Cards = append(player.Cards, Card{Suit: "Clubs", Name: "9", Weight: 9, Number: 9})
+	g.Players = append(g.Players, player)
+
+	player.Status = PLAYER_STATUS_PLAYING
+	player.Name = "B"
+	player.Cards = nil
+	player.Cards = append(player.Cards, Card{Suit: "Spades", Name: "8", Weight: 8, Number: 8})
+	player.Cards = append(player.Cards, Card{Suit: "Hearts", Name: "9", Weight: 9, Number: 9})
+	player.Cards = append(player.Cards, Card{Suit: "Clubs", Name: "8", Weight: 8, Number: 8})
+	g.Players = append(g.Players, player)
+
+	player.Status = PLAYER_STATUS_PLAYING
+	player.Name = "C"
+	player.Cards = nil
+	player.Cards = append(player.Cards, Card{Suit: "Spades", Name: "4", Weight: 4, Number: 4})
+	player.Cards = append(player.Cards, Card{Suit: "Hearts", Name: "8", Weight: 8, Number: 8})
+	player.Cards = append(player.Cards, Card{Suit: "Clubs", Name: "7", Weight: 7, Number: 7})
+	g.Players = append(g.Players, player)
+	result := g.ShowPlayerCards()
+	if !result {
+		t.Errorf("Expected true, received %v", result)
+	}
+}
+func TestUpdateStatusOfPlayersPlaying(t *testing.T) {
+	var g Game
+	var player Player
+
+	player.Status = PLAYER_STATUS_PLAYING
+	player.Name = "A"
+	player.Cards = append(player.Cards, Card{Suit: "Spades", Name: "7", Weight: 7, Number: 7})
+	player.Cards = append(player.Cards, Card{Suit: "Hearts", Name: "7", Weight: 7, Number: 7})
+	player.Cards = append(player.Cards, Card{Suit: "Clubs", Name: "9", Weight: 9, Number: 9})
+	g.Players = append(g.Players, player)
+
+	player.Status = PLAYER_STATUS_PLAYING
+	player.Name = "B"
+	player.Cards = nil
+	player.Cards = append(player.Cards, Card{Suit: "Spades", Name: "8", Weight: 8, Number: 8})
+	player.Cards = append(player.Cards, Card{Suit: "Hearts", Name: "9", Weight: 9, Number: 9})
+	player.Cards = append(player.Cards, Card{Suit: "Clubs", Name: "8", Weight: 8, Number: 8})
+	g.Players = append(g.Players, player)
+
+	player.Status = PLAYER_STATUS_WIN
+	player.Name = "C"
+	player.Cards = nil
+	player.Cards = append(player.Cards, Card{Suit: "Spades", Name: "4", Weight: 4, Number: 4})
+	player.Cards = append(player.Cards, Card{Suit: "Hearts", Name: "8", Weight: 8, Number: 8})
+	player.Cards = append(player.Cards, Card{Suit: "Clubs", Name: "7", Weight: 7, Number: 7})
+	g.Players = append(g.Players, player)
+	result := g.UpdateStatusOfPlayers()
+	if !result {
+		t.Errorf("Expected true, received %v", result)
 	}
 }

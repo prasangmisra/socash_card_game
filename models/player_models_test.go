@@ -4,6 +4,28 @@ import (
 	"testing"
 )
 
+func TestConstantPlaying(t *testing.T) {
+	if PLAYER_STATUS_PLAYING != "playing" {
+		t.Errorf("Expected playing, received %v", PLAYER_STATUS_PLAYING)
+	}
+}
+func TestConstantLost(t *testing.T) {
+	if PLAYER_STATUS_LOST != "lost" {
+		t.Errorf("Expected lost, received %v", PLAYER_STATUS_LOST)
+	}
+}
+
+func TestConstantTie(t *testing.T) {
+	if PLAYER_STATUS_TIE != "tie" {
+		t.Errorf("Expected tie, received %v", PLAYER_STATUS_TIE)
+	}
+}
+
+func TestConstantWin(t *testing.T) {
+	if PLAYER_STATUS_WIN != "win" {
+		t.Errorf("Expected win, received %v", PLAYER_STATUS_WIN)
+	}
+}
 func TestIsTrailPositive(t *testing.T) {
 	var p Player
 	p.Cards = append(p.Cards, Card{Suit: "Spades", Name: "7", Weight: 7, Number: 7})
@@ -87,7 +109,7 @@ func TestPairPositive(t *testing.T) {
 	p.Cards = append(p.Cards, Card{Suit: "Spades", Name: "2", Weight: 2, Number: 2})
 	p.Cards = append(p.Cards, Card{Suit: "Hearts", Name: "7", Weight: 7, Number: 7})
 	result := p.IsPair()
-	if result {
+	if !result {
 		t.Errorf("Expected false, got %v", result)
 	}
 }
@@ -127,7 +149,7 @@ func TestTopCardPositiveMultiple(t *testing.T) {
 	p.Cards = append(p.Cards, Card{Suit: "Spades", Name: "2", Weight: 2, Number: 2})
 	p.Cards = append(p.Cards, Card{Suit: "Hearts", Name: "7", Weight: 7, Number: 7})
 	result := p.GetTopCard()
-	if result.Number != 8 {
+	if result.Number != 7 {
 		t.Errorf("Expected 7, got %v", result.Number)
 	}
 }

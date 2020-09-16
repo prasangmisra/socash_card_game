@@ -84,7 +84,7 @@ func (g *Game) InitGamePlayers(in *os.File) bool {
 	}
 	//numberOfPlayers, _ = strconv.Atoi(numberOfPlayersString)
 	//52 is the number of cards available
-	if numberOfPlayers > 52 {
+	if numberOfPlayers > 52 || numberOfPlayers < 2 {
 		return false //"Cannot play with so many members")
 	}
 	var players []Player
@@ -329,11 +329,12 @@ func (g *Game) StartGame() bool {
 			if stepResponse && len(players) > 0 {
 				//fmt.Println("All Good. Total winners are:", len(players))
 				if len(players) == 1 {
-					//fmt.Println("Game over, winner is ", g.Winner.Name)
+
+					fmt.Println("Game over, winner is ", g.Winner.Name)
 					return true
 				} else {
 					g.UpdateStatusOfPlayers()
-					//fmt.Println("Will have to send some more cards")
+					fmt.Println("Will have to send some more cards")
 					return g.PlayFaceOff()
 				}
 			} else {

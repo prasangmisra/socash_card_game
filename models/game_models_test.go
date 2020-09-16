@@ -116,6 +116,26 @@ func TestInitGameNegativeMorePlayers(t *testing.T) {
 	}
 }
 
+func TestInitGameNegativeLessPlayers(t *testing.T) {
+	var g Game
+	in, err := ioutil.TempFile("", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer in.Close()
+	_, err = io.WriteString(in, "1\n"+"Prasang Misra\nb\nc\nd")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = in.Seek(0, os.SEEK_SET)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result := g.InitGamePlayers(in)
+	if result {
+		t.Errorf("Expected false, got %v", result)
+	}
+}
 func TestFindWinnerFromTiePositive(t *testing.T) {
 	var g Game
 	var player Player
